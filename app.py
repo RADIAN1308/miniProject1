@@ -1,8 +1,11 @@
 # analyze.py
 import flet as ft
 
+# This will store the image and associated data globally
+uploaded_images_data = []
+
 def analyze_page(page: ft.Page):
-    uploaded_images = []
+    # Initialize the gallery column to hold images
     image_gallery = ft.Column(scroll=ft.ScrollMode.AUTO, spacing=10)
     upload_section = ft.Column(visible=False)
 
@@ -16,17 +19,25 @@ def analyze_page(page: ft.Page):
     def handle_file_result(e: ft.FilePickerResultEvent):
         if e.files:
             for f in e.files:
+                # Initialize vote counts
                 upvote_count = ft.Text("0", width=30, text_align=ft.TextAlign.CENTER)
                 downvote_count = ft.Text("0", width=30, text_align=ft.TextAlign.CENTER)
                 comment_field = ft.TextField(label="Add a comment", expand=True)
                 comments_display = ft.Column()
 
+                upvotes = 0
+                downvotes = 0
+
                 def upvote_click(ev):
-                    upvote_count.value = str(int(upvote_count.value) + 1)
+                    nonlocal upvotes
+                    upvotes += 1
+                    upvote_count.value = str(upvotes)
                     page.update()
 
                 def downvote_click(ev):
-                    downvote_count.value = str(int(downvote_count.value) + 1)
+                    nonlocal downvotes
+                    downvotes += 1
+                    downvote_count.value = str(downvotes)
                     page.update()
 
                 def submit_comment(ev):
@@ -66,9 +77,16 @@ def analyze_page(page: ft.Page):
                     border_radius=10,
                 )
 
-                uploaded_images.append(image_card)
+                # Save the data for the image
+                uploaded_images_data.append({
+                    'image_card': image_card,
+                    'upvotes': upvotes,
+                    'downvotes': downvotes,
+                    'comments': comments_display
+                })
 
-            image_gallery.controls = uploaded_images
+            # Re-render all the images after adding new ones
+            image_gallery.controls = [x['image_card'] for x in uploaded_images_data]
             page.update()
 
     file_picker = ft.FilePicker(on_result=handle_file_result)
@@ -83,6 +101,9 @@ def analyze_page(page: ft.Page):
         ft.Text("Uploaded Image Analysis:", style=ft.TextThemeStyle.TITLE_MEDIUM),
         image_gallery
     ]
+
+    # Load the previous images and controls
+    image_gallery.controls = [x['image_card'] for x in uploaded_images_data]
 
     page.views.append(
         ft.View(
