@@ -1,78 +1,108 @@
 # analyze.py
 import flet as ft
 
-def analyze_view(page: ft.Page):
-    page.title = "Pothole Severity Classifier"
-    page.theme_mode = ft.ThemeMode.DARK
-    page.bgcolor = "#121212"
-
-    uploaded_image = ft.Image(width=300, height=300, fit=ft.ImageFit.CONTAIN)
-    result_text = ft.Text(visible=False, size=18, weight=ft.FontWeight.BOLD)
-    confidence_text = ft.Text(visible=False, size=16)
-
-    def pick_files_result(e: ft.FilePickerResultEvent):
-        if e.files:
-            file_path = e.files[0].path
-            uploaded_image.src = file_path
-            uploaded_image.visible = True
-            page.update()
-
-    def classify_image(e):
-        result_text.value = "Risk Level: HIGH"
-        result_text.color = ft.colors.RED_ACCENT
-        result_text.visible = True
-
-        confidence_text.value = "Confidence Score: 91%"
-        confidence_text.color = ft.colors.GREEN_ACCENT
-        confidence_text.visible = True
-        page.update()
-
-    def toggle_theme(e):
-        if page.theme_mode == ft.ThemeMode.DARK:
-            page.theme_mode = ft.ThemeMode.LIGHT
-            page.bgcolor = ft.colors.WHITE
-        else:
-            page.theme_mode = ft.ThemeMode.DARK
-            page.bgcolor = "#121212"
-        page.update()
+def analyze_page(page: ft.Page):
+    uploaded_images = []
+    image_gallery = ft.Column(scroll=ft.ScrollMode.AUTO, spacing=10)
+    upload_section = ft.Column(visible=False)
 
     def go_back(e):
         page.go("/")
 
-    file_picker = ft.FilePicker(on_result=pick_files_result)
+    def toggle_upload_section(e):
+        upload_section.visible = not upload_section.visible
+        page.update()
+
+    def handle_file_result(e: ft.FilePickerResultEvent):
+        if e.files:
+            for f in e.files:
+                upvote_count = ft.Text("0", width=30, text_align=ft.TextAlign.CENTER)
+                downvote_count = ft.Text("0", width=30, text_align=ft.TextAlign.CENTER)
+                comment_field = ft.TextField(label="Add a comment", expand=True)
+                comments_display = ft.Column()
+
+                def upvote_click(ev):
+                    upvote_count.value = str(int(upvote_count.value) + 1)
+                    page.update()
+
+                def downvote_click(ev):
+                    downvote_count.value = str(int(downvote_count.value) + 1)
+                    page.update()
+
+                def submit_comment(ev):
+                    if comment_field.value.strip():
+                        comments_display.controls.append(
+                            ft.Text(f"💬 {comment_field.value}", italic=True)
+                        )
+                        comment_field.value = ""
+                        page.update()
+
+                image_card = ft.Container(
+                    content=ft.Column(
+                        [
+                            ft.Image(src=f.path, width=200, height=200, fit=ft.ImageFit.CONTAIN),
+                            ft.Text("Prediction: [placeholder result]", weight=ft.FontWeight.BOLD),
+                            ft.Text("Confidence: [placeholder confidence]"),
+                            ft.Row(
+                                [
+                                    ft.IconButton(ft.icons.THUMB_UP, on_click=upvote_click),
+                                    upvote_count,
+                                    ft.IconButton(ft.icons.THUMB_DOWN, on_click=downvote_click),
+                                    downvote_count,
+                                ],
+                                alignment=ft.MainAxisAlignment.START,
+                                spacing=5,
+                            ),
+                            ft.Row(
+                                [comment_field, ft.IconButton(ft.icons.SEND, on_click=submit_comment)],
+                                alignment=ft.MainAxisAlignment.START
+                            ),
+                            comments_display
+                        ],
+                        spacing=10
+                    ),
+                    padding=10,
+                    border=ft.border.all(1, ft.colors.GREY_600),
+                    border_radius=10,
+                )
+
+                uploaded_images.append(image_card)
+
+            image_gallery.controls = uploaded_images
+            page.update()
+
+    file_picker = ft.FilePicker(on_result=handle_file_result)
     page.overlay.append(file_picker)
+
+    upload_section.controls = [
+        ft.ElevatedButton(
+            text="Pick Images",
+            icon=ft.icons.UPLOAD_FILE,
+            on_click=lambda _: file_picker.pick_files(allow_multiple=True)
+        ),
+        ft.Text("Uploaded Image Analysis:", style=ft.TextThemeStyle.TITLE_MEDIUM),
+        image_gallery
+    ]
 
     page.views.append(
         ft.View(
             "/analyze",
-            [
-                ft.Row(
+            controls=[
+                ft.AppBar(
+                    title=ft.Text("Analyze Potholes"),
+                    leading=ft.IconButton(icon=ft.icons.ARROW_BACK, on_click=go_back),
+                ),
+                ft.Column(
                     controls=[
-                        ft.IconButton(icon=ft.icons.ARROW_BACK, tooltip="Back", on_click=go_back),
-                        ft.Icon(ft.icons.LOCATION_ON, color=ft.colors.BLUE_GREY_100),
-                        ft.Text("Pothole Classifier", size=30, weight=ft.FontWeight.BOLD),
-                        ft.IconButton(icon=ft.icons.BRIGHTNESS_6, tooltip="Swap Theme", on_click=toggle_theme),
+                        ft.Text("Pothole Severity Classification", size=24, weight=ft.FontWeight.W_600),
+                        ft.Text("Upload road images to analyze severity automatically."),
+                        ft.TextButton("📂 Show/Hide Image Upload", on_click=toggle_upload_section),
+                        upload_section
                     ],
-                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN
-                ),
-                ft.Text("Upload a pothole image to classify its severity", size=18),
-                ft.ElevatedButton(
-                    "Upload Image",
-                    icon=ft.icons.UPLOAD_FILE,
-                    on_click=lambda _: file_picker.pick_files(allow_multiple=False),
-                ),
-                uploaded_image,
-                ft.ElevatedButton(
-                    "Classify Pothole",
-                    icon=ft.icons.SEARCH,
-                    on_click=classify_image,
-                ),
-                result_text,
-                confidence_text,
-                ft.Divider(),
-                ft.Text("Built with ❤️ using Flet and Keras", size=12, italic=True)
+                    expand=True,
+                    spacing=20,
+                )
             ],
-            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            spacing=20
+            scroll=ft.ScrollMode.AUTO
         )
     )

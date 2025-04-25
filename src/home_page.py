@@ -1,6 +1,6 @@
 # home.py
 import flet as ft
-from app import analyze_view
+from app import analyze_page
 
 def main(page: ft.Page):
     page.title = "CityFix - Home"
@@ -23,7 +23,7 @@ def main(page: ft.Page):
                 )
             )
         elif page.route == "/analyze":
-            analyze_view(page)
+            analyze_page(page)
 
         page.update()
 
