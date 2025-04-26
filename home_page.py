@@ -16,7 +16,8 @@ def main(page: ft.Page):
                     [
                         ft.Text("Welcome to CityFix", size=28, weight=ft.FontWeight.BOLD),
                         ft.Text("Classify potholes by severity using AI!", size=18),
-                        ft.ElevatedButton("Analyze roads", icon=ft.icons.SEARCH, on_click=lambda e: page.go("/analyze")),
+                        ft.ElevatedButton("Analyze roads", icon=ft.Icons.SEARCH,
+                                          on_click=lambda e: page.go("/analyze")),
                     ],
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     vertical_alignment=ft.MainAxisAlignment.CENTER

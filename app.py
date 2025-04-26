@@ -1,4 +1,3 @@
-# analyze.py
 import flet as ft
 
 # This will store the image and associated data globally
@@ -56,16 +55,16 @@ def analyze_page(page: ft.Page):
                             ft.Text("Confidence: [placeholder confidence]"),
                             ft.Row(
                                 [
-                                    ft.IconButton(ft.icons.THUMB_UP, on_click=upvote_click),
+                                    ft.IconButton(ft.Icons.THUMB_UP, on_click=upvote_click),
                                     upvote_count,
-                                    ft.IconButton(ft.icons.THUMB_DOWN, on_click=downvote_click),
+                                    ft.IconButton(ft.Icons.THUMB_DOWN, on_click=downvote_click),
                                     downvote_count,
                                 ],
                                 alignment=ft.MainAxisAlignment.START,
                                 spacing=5,
                             ),
                             ft.Row(
-                                [comment_field, ft.IconButton(ft.icons.SEND, on_click=submit_comment)],
+                                [comment_field, ft.IconButton(ft.Icons.SEND, on_click=submit_comment)],
                                 alignment=ft.MainAxisAlignment.START
                             ),
                             comments_display
@@ -73,7 +72,7 @@ def analyze_page(page: ft.Page):
                         spacing=10
                     ),
                     padding=10,
-                    border=ft.border.all(1, ft.colors.GREY_600),
+                    border=ft.border.all(1, ft.Colors.GREY_600),
                     border_radius=10,
                 )
 
@@ -95,7 +94,7 @@ def analyze_page(page: ft.Page):
     upload_section.controls = [
         ft.ElevatedButton(
             text="Pick Images",
-            icon=ft.icons.UPLOAD_FILE,
+            icon=ft.Icons.UPLOAD_FILE,
             on_click=lambda _: file_picker.pick_files(allow_multiple=True)
         ),
         ft.Text("Uploaded Image Analysis:", style=ft.TextThemeStyle.TITLE_MEDIUM),
@@ -111,7 +110,7 @@ def analyze_page(page: ft.Page):
             controls=[
                 ft.AppBar(
                     title=ft.Text("Analyze Potholes"),
-                    leading=ft.IconButton(icon=ft.icons.ARROW_BACK, on_click=go_back),
+                    leading=ft.IconButton(icon=ft.Icons.ARROW_BACK, on_click=go_back),
                 ),
                 ft.Column(
                     controls=[
